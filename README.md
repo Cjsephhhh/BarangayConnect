@@ -23,35 +23,55 @@ Project Increment 1 implements the User Accounts and Authentication module from 
 - Frontend: React, Vite, React Router, Lucide
 - Backend: Java 17, Spring Boot 3.5.6, Spring Security, Spring Data JPA
 - Authentication: JWT (JJWT) and BCrypt
-- Database: PostgreSQL 15+
+- Database: Supabase-hosted PostgreSQL
+- Database connectivity: PostgreSQL JDBC driver through Supabase Session Pooler (SSL required)
 - API: REST / JSON
 
 ## Prerequisites
 
-Java 17+, Maven 3.9+, Node.js 20.19+ and npm, PostgreSQL 15+.
+- Java 17+
+- Maven 3.9+
+- Node.js 20.19+ and npm
+- A Supabase project with its PostgreSQL database
 
-## 1. Create the database
+## 1. Create the Supabase project
 
-Run in pgAdmin or psql:
+1. Open the [Supabase Dashboard](https://supabase.com/dashboard).
+2. Create a project named `BarangayConnect`.
+3. Choose Singapore as the region when available (or the closest available region to your users).
+4. Save the database password securely. It is different from your Supabase account password.
+5. The current application connects from Spring Boot directly to PostgreSQL using JDBC. It does not use the Supabase Data API or a Supabase frontend client. You can leave Data API access and automatic RLS options disabled for this initial backend-only database access pattern.
+6. Wait until the project finishes provisioning.
 
-```sql
-CREATE DATABASE barangayconnect;
+## 2. Get the database connection string
+
+1. Open your BarangayConnect project in Supabase.
+2. Click **Connect**.
+3. Select **Session pooler** as the connection method.
+4. Select the **JDBC** format if the dashboard offers a format selector.
+5. Copy the connection string. Use the actual host, port, username, and project reference shown by Supabase; do not type example placeholders.
+6. Confirm the URL uses port `5432` and includes `sslmode=require`.
+
+Use Session Pooler for a typical IPv4-only local Windows network. The direct database connection may require IPv6 or an IPv4 add-on. Do not use Transaction Pooler (port 6543) for this Spring Boot/JPA configuration.
+
+The connection string should have this general JDBC shape (illustrative only):
+
+```text
+jdbc:postgresql://POOLER_HOST:5432/postgres?user=postgres.PROJECT_REF&password=YOUR_DATABASE_PASSWORD&sslmode=require
 ```
 
-Hibernate creates the `user_accounts`, `login_sessions`, and `audit_logs` tables on first startup (development configuration).
+If your password contains URL-reserved characters such as `&`, `#`, `?`, or spaces, URL-encode those characters in the connection string. Do not paste your real connection string into GitHub, source code, screenshots, or public chats.
 
-## 2. Configure and run the backend
+## 3. Configure and run the backend (Windows PowerShell)
 
-Open PowerShell in `backend`. Replace the example credentials:
+Open PowerShell in the `backend` folder. Replace the example values with your own secure values. Set `SUPABASE_DB_URL` to the complete JDBC string copied from Supabase Connect:
 
 ```powershell
-$env:DATABASE_URL="jdbc:postgresql://localhost:5432/barangayconnect"
-$env:DB_USERNAME="postgres"
-$env:DB_PASSWORD="YOUR_POSTGRES_PASSWORD"
+$env:SUPABASE_DB_URL="jdbc:postgresql://YOUR_POOLER_HOST:5432/postgres?user=postgres.YOUR_PROJECT_REF&password=YOUR_DATABASE_PASSWORD&sslmode=require"
 $env:JWT_SECRET="replace-with-a-random-secret-at-least-32-characters"
 $env:FRONTEND_ORIGIN="http://localhost:5173"
 $env:BOOTSTRAP_ADMIN_EMAIL="admin@barangayconnect.local"
-$env:BOOTSTRAP_ADMIN_PASSWORD="ChangeThisAdminPassword123!"
+$env:BOOTSTRAP_ADMIN_PASSWORD="ChooseAUniqueStrongPassword123!"
 $env:BOOTSTRAP_ADMIN_NAME="BarangayConnect Administrator"
 $env:BOOTSTRAP_ADMIN_MOBILE="09999999999"
 mvn spring-boot:run
@@ -62,7 +82,9 @@ The bootstrap administrator is created only when both bootstrap email and passwo
 Backend: `http://localhost:8080`  
 Health check: `GET http://localhost:8080/api/v1/health`
 
-## 3. Run the frontend
+The backend uses Hibernate schema update for this development increment. On first successful connection, it creates the application's tables in the Supabase PostgreSQL database. Do not use `ddl-auto=update` as a production migration strategy; use reviewed database migrations before production.
+
+## 4. Run the frontend
 
 Open a second terminal in `frontend`:
 
@@ -73,7 +95,7 @@ npm run dev
 
 Frontend: `http://localhost:5173`
 
-For a remote backend, create a local `.env` file based on `.env.example` and set `VITE_API_URL` to the API base URL.
+The React application calls the Spring Boot API. It must not contain the Supabase database password or the JDBC connection string.
 
 ## API endpoints
 
@@ -130,24 +152,27 @@ Backend authorization is enforced independently of frontend route protection.
 ## Security notes
 
 - Use HTTPS in deployment and a strong, unique JWT secret.
-- Use a dedicated PostgreSQL account with least-privilege permissions.
+- Keep the Supabase database password and complete JDBC URL only in backend environment variables or a secrets manager.
 - Never commit local `.env` files, credentials, API keys, or production data.
+- The current backend connects as a trusted database role and does not expose the database directly to the browser. If the Supabase Data API or a Supabase client is introduced later, enable RLS and write explicit least-privilege policies before exposing tables.
 - Configure database migrations and `ddl-auto=validate` before production.
 - This coursework MVP stores the bearer token in browser local storage. A production release should consider HttpOnly, Secure, SameSite cookies and corresponding CSRF protections.
 - SMS OTP registration and password reset (FR-008 and FR-009) are Should Have items in the SRS and are not implemented in this increment.
 
 ## Verification checklist
 
-1. Register a resident with valid details.
-2. Register the same email/mobile again and confirm duplicate rejection.
-3. Confirm the database stores a BCrypt hash, not the original password.
-4. Login with email and then mobile number.
-5. Logout and verify the old token cannot access protected endpoints.
-6. Submit five incorrect passwords and verify the 15-minute lock.
-7. Login as bootstrap administrator and create official accounts for each official role.
-8. Confirm a resident receives HTTP 403 on administrator endpoints.
-9. Deactivate a user and verify protected access is denied.
-10. Review audit logs for account and authentication events.
+1. Confirm the backend starts and connects to the Supabase database.
+2. Confirm the application tables appear in Supabase Table Editor.
+3. Register a resident with valid details.
+4. Register the same email/mobile again and confirm duplicate rejection.
+5. Confirm the database stores a BCrypt hash, not the original password.
+6. Login with email and then mobile number.
+7. Logout and verify the old token cannot access protected endpoints.
+8. Submit five incorrect passwords and verify the 15-minute lock.
+9. Login as bootstrap administrator and create official accounts for each official role.
+10. Confirm a resident receives HTTP 403 on administrator endpoints.
+11. Deactivate a user and verify protected access is denied.
+12. Review audit logs for account and authentication events.
 
 ## Scope note
 
