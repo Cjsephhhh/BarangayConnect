@@ -20,6 +20,12 @@ app:
     expiration-minutes: 30
   cors:
     allowed-origin: ${FRONTEND_ORIGIN:http://localhost:5173}
+  bootstrap-admin:
+    email: ${BOOTSTRAP_ADMIN_EMAIL:}
+    password: ${BOOTSTRAP_ADMIN_PASSWORD:}
+    full-name: ${BOOTSTRAP_ADMIN_NAME:System Administrator}
+    mobile: ${BOOTSTRAP_ADMIN_MOBILE:09999999999}
+    address: ${BOOTSTRAP_ADMIN_ADDRESS:BarangayConnect Administration}
 logging:
   level:
     org.springframework.security: INFO
