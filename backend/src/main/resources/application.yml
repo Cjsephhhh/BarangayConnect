@@ -1,0 +1,25 @@
+server:
+  port: ${PORT:8080}
+spring:
+  application:
+    name: barangayconnect-api
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/barangayconnect}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+app:
+  jwt:
+    secret: ${JWT_SECRET:change-this-development-secret-to-a-long-random-256-bit-key-before-deployment}
+    expiration-minutes: 30
+  cors:
+    allowed-origin: ${FRONTEND_ORIGIN:http://localhost:5173}
+logging:
+  level:
+    org.springframework.security: INFO
