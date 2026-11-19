@@ -5,7 +5,7 @@ import java.time.Instant;
 @Entity @Table(name="login_sessions",indexes=@Index(name="idx_session_jti",columnList="jti",unique=true))
 public class LoginSession {
  @Id @GeneratedValue(strategy=GenerationType.IDENTITY) private Long id;
- @ManyToOne(optional=false,fetch=FetchType.LAZY) private UserAccount user;
+ @ManyToOne(optional=false,fetch=FetchType.EAGER) private UserAccount user;
  @Column(nullable=false,unique=true,length=80) private String jti;
  @Column(nullable=false) private Instant expiresAt;
  @Column(nullable=false) private Instant lastActivityAt;
