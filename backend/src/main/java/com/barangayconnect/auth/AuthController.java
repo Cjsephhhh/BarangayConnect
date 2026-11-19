@@ -6,4 +6,8 @@ import jakarta.servlet.http.HttpServletRequest;import jakarta.validation.Valid;i
  @PostMapping("/login") public AuthResponse login(@Valid @RequestBody LoginRequest r,HttpServletRequest q){return service.login(r,q);}
  @PostMapping("/logout") public MessageResponse logout(@RequestHeader(value="Authorization",required=false)String h,Authentication a,HttpServletRequest q){service.logout(h,a.getName(),q);return new MessageResponse("You have been logged out.");}
  @GetMapping("/me") public UserResponse me(Authentication a){return service.current(a.getName());}
+ public record ProfileRequest(String fullName,String address,String mobileNumber){}
+ @PutMapping("/profile") public UserResponse profile(@RequestBody ProfileRequest r,Authentication a,HttpServletRequest q){return service.updateProfile(a.getName(),r.fullName(),r.address(),r.mobileNumber(),q);}
+ public record PasswordRequest(String currentPassword,String newPassword){}
+ @PutMapping("/password") public MessageResponse password(@RequestBody PasswordRequest r,Authentication a){service.changePassword(a.getName(),r.currentPassword(),r.newPassword());return new MessageResponse("Password updated successfully.");}
 }
