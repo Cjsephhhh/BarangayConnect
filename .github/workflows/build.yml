@@ -1,7 +1,7 @@
 name: Build Increment 1
 on:
   push:
-    branches: [main, increment-1-auth]
+    branches: [main, increment-1-auth, increment-2-profile-password]
   pull_request:
     branches: [main]
 jobs:
