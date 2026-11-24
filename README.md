@@ -177,3 +177,58 @@ Backend authorization is enforced independently of frontend route protection.
 ## Scope note
 
 This increment establishes the authentication and role foundation. Guided case intake, complaint filing, jurisdiction verification, hearing management, settlement, documents, and reports are subsequent increments.
+
+ 
+## Project Increment 2: User Profile and Password Management
+
+The `increment-2-profile-password` branch extends the Increment 1 account foundation with:
+
+- Authenticated users can view and update only their own name, address, and Philippine mobile number. Email remains read-only as the account identifier.
+- Profile updates validate required values and reject duplicate mobile numbers.
+- Change password requires the current password, a new password between 8 and 72 characters, and matching confirmation. Reusing the current password is rejected.
+- Successful password changes update the BCrypt hash and revoke all active sessions, requiring a fresh login.
+- Forgot password sends a 15-minute, single-use reset link to the registered email address. Only a SHA-256 hash of the random token is stored in PostgreSQL.
+- Reset password checks token validity, expiry, single-use status, password length, and confirmation. Completing a reset changes the BCrypt hash and revokes all active sessions.
+- Password reset requests return a generic response for unknown email addresses to avoid account enumeration.
+
+### Increment 2 API
+
+| Method | Endpoint | Access | Purpose |
+|---|---|---|---|
+| GET | `/api/v1/profile` | Authenticated | View own profile |
+| PUT | `/api/v1/profile` | Authenticated | Update own profile |
+| PUT | `/api/v1/profile/password` | Authenticated | Change password |
+| POST | `/api/v1/profile/forgot-password` | Public | Request reset email |
+| POST | `/api/v1/profile/reset-password` | Public | Complete reset using token |
+
+### Configure SMTP for password recovery
+
+Password recovery requires an SMTP account. Configure these backend environment variables before testing the forgot-password flow:
+
+```powershell
+$env:SMTP_HOST="smtp.example.com"
+$env:SMTP_PORT="587"
+$env:SMTP_USERNAME="your-smtp-username"
+$env:SMTP_PASSWORD="your-smtp-password"
+$env:SMTP_FROM="no-reply@your-verified-domain.com"
+$env:FRONTEND_URL="http://localhost:5173"
+```
+
+Use credentials from a real SMTP provider or institutional email service. Do not commit SMTP credentials. The forgot-password endpoint returns HTTP 503 when SMTP is not configured. The reset token expires after 15 minutes and is single-use.
+
+### Increment 2 verification checklist
+
+1. Sign in with a test account and open **My profile & password**.
+2. Confirm the profile displays the authenticated account's details.
+3. Update the name, address, and mobile number; verify changes in Supabase.
+4. Attempt to use another account's mobile number and confirm the update is rejected.
+5. Change the password with an incorrect current password and confirm rejection.
+6. Submit mismatched new-password confirmation and confirm rejection.
+7. Change the password successfully and confirm the old session is revoked.
+8. Sign in using the new password and confirm the old password no longer works.
+9. Request a password reset for a registered email and confirm the email arrives.
+10. Use the reset link once, then confirm a second use is rejected.
+11. Wait beyond 15 minutes or test an expired token and confirm reset is rejected.
+12. Confirm reset tokens are stored as hashes and password hashes are BCrypt.
+
+Runtime testing requires the Supabase connection and SMTP variables to be configured locally. Do not use real personal accounts or passwords as submission test credentials.
