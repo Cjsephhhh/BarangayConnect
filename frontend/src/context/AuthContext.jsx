@@ -8,6 +8,6 @@ export function AuthProvider({ children }) {
  async function login(identifier,password){return accept(await api('/auth/login',{method:'POST',body:JSON.stringify({identifier,password})}))}
  async function register(data){return accept(await api('/auth/register',{method:'POST',body:JSON.stringify(data)}))}
  async function logout(){try{await api('/auth/logout',{method:'POST'})}finally{localStorage.removeItem('bc_token');setUser(null)}}
- return <AuthContext.Provider value={{user,loading,login,register,logout,refresh:async()=>setUser(await api('/auth/me'))}}>{children}</AuthContext.Provider>
+ function clearSession(){localStorage.removeItem('bc_token');setUser(null)}\n return <AuthContext.Provider value={{user,loading,login,register,logout,clearSession,refresh:async()=>setUser(await api('/auth/me'))}}>{children}</AuthContext.Provider>
 }
 export const useAuth=()=>useContext(AuthContext)
