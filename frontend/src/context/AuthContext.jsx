@@ -28,17 +28,21 @@ export function AuthProvider({ children }) {
   }
 
   async function login(identifier, password) {
-    return accept(await api('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ identifier, password })
-    }))
+    return accept(
+      await api('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ identifier, password }),
+      }),
+    )
   }
 
   async function register(data) {
-    return accept(await api('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify(data)
-    }))
+    return accept(
+      await api('/auth/register', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    )
   }
 
   async function logout() {
@@ -60,9 +64,11 @@ export function AuthProvider({ children }) {
     return current
   }
 
-  return <AuthContext.Provider value={{ user, loading, login, register, logout, clearSession, refresh }}>
-    {children}
-  </AuthContext.Provider>
+  return (
+    <AuthContext.Provider value={{ user, loading, login, register, logout, clearSession, refresh }}>
+      {children}
+    </AuthContext.Provider>
+  )
 }
 
 export const useAuth = () => useContext(AuthContext)

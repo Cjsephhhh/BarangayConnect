@@ -99,18 +99,18 @@ The React application calls the Spring Boot API. It must not contain the Supabas
 
 ## API endpoints
 
-| Method | Endpoint | Access | Purpose |
-|---|---|---|---|
-| POST | `/api/v1/auth/register` | Public | Register resident |
-| POST | `/api/v1/auth/login` | Public | Login with email/mobile |
-| GET | `/api/v1/auth/me` | Authenticated | Get current account |
-| POST | `/api/v1/auth/logout` | Authenticated | Revoke current session |
-| PUT | `/api/v1/auth/profile` | Authenticated | Update profile |
-| PUT | `/api/v1/auth/password` | Authenticated | Change password |
-| GET | `/api/v1/admin/users` | System Administrator | List accounts |
-| POST | `/api/v1/admin/officials` | System Administrator | Create official account |
-| PATCH | `/api/v1/admin/users/{id}/status` | System Administrator | Activate/deactivate account |
-| GET | `/api/v1/admin/audit-logs` | System Administrator | View audit records |
+| Method | Endpoint                          | Access               | Purpose                     |
+| ------ | --------------------------------- | -------------------- | --------------------------- |
+| POST   | `/api/v1/auth/register`           | Public               | Register resident           |
+| POST   | `/api/v1/auth/login`              | Public               | Login with email/mobile     |
+| GET    | `/api/v1/auth/me`                 | Authenticated        | Get current account         |
+| POST   | `/api/v1/auth/logout`             | Authenticated        | Revoke current session      |
+| PUT    | `/api/v1/auth/profile`            | Authenticated        | Update profile              |
+| PUT    | `/api/v1/auth/password`           | Authenticated        | Change password             |
+| GET    | `/api/v1/admin/users`             | System Administrator | List accounts               |
+| POST   | `/api/v1/admin/officials`         | System Administrator | Create official account     |
+| PATCH  | `/api/v1/admin/users/{id}/status` | System Administrator | Activate/deactivate account |
+| GET    | `/api/v1/admin/audit-logs`        | System Administrator | View audit records          |
 
 Protected endpoints require `Authorization: Bearer <token>`.
 
@@ -139,12 +139,12 @@ Public registration always assigns `RESIDENT`; clients cannot self-assign privil
 
 ## Role access
 
-| Role | Workspace |
-|---|---|
-| RESIDENT | Resident dashboard |
-| BARANGAY_SECRETARY | Secretary dashboard |
-| PUNONG_BARANGAY | Punong Barangay dashboard |
-| LUPON_MEMBER | Lupon Member dashboard |
+| Role                 | Workspace                                     |
+| -------------------- | --------------------------------------------- |
+| RESIDENT             | Resident dashboard                            |
+| BARANGAY_SECRETARY   | Secretary dashboard                           |
+| PUNONG_BARANGAY      | Punong Barangay dashboard                     |
+| LUPON_MEMBER         | Lupon Member dashboard                        |
 | SYSTEM_ADMINISTRATOR | Administration dashboard and account controls |
 
 Backend authorization is enforced independently of frontend route protection.
@@ -178,7 +178,6 @@ Backend authorization is enforced independently of frontend route protection.
 
 This increment establishes the authentication and role foundation. Guided case intake, complaint filing, jurisdiction verification, hearing management, settlement, documents, and reports are subsequent increments.
 
- 
 ## Project Increment 2: User Profile and Password Management
 
 The `increment-2-profile-password` branch extends the Increment 1 account foundation with:
@@ -193,13 +192,13 @@ The `increment-2-profile-password` branch extends the Increment 1 account founda
 
 ### Increment 2 API
 
-| Method | Endpoint | Access | Purpose |
-|---|---|---|---|
-| GET | `/api/v1/profile` | Authenticated | View own profile |
-| PUT | `/api/v1/profile` | Authenticated | Update own profile |
-| PUT | `/api/v1/profile/password` | Authenticated | Change password |
-| POST | `/api/v1/profile/forgot-password` | Public | Request reset email |
-| POST | `/api/v1/profile/reset-password` | Public | Complete reset using token |
+| Method | Endpoint                          | Access        | Purpose                    |
+| ------ | --------------------------------- | ------------- | -------------------------- |
+| GET    | `/api/v1/profile`                 | Authenticated | View own profile           |
+| PUT    | `/api/v1/profile`                 | Authenticated | Update own profile         |
+| PUT    | `/api/v1/profile/password`        | Authenticated | Change password            |
+| POST   | `/api/v1/profile/forgot-password` | Public        | Request reset email        |
+| POST   | `/api/v1/profile/reset-password`  | Public        | Complete reset using token |
 
 ### Configure SMTP for password recovery
 
