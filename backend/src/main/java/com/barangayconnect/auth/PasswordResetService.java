@@ -4,14 +4,13 @@ import com.barangayconnect.audit.AuditLog;
 import com.barangayconnect.audit.AuditLogRepository;
 import com.barangayconnect.user.UserAccount;
 import com.barangayconnect.user.UserRepository;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.mail.SimpleMailMessage;\nimport org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -33,36 +32,41 @@ public class PasswordResetService {
     private final AuditLogRepository audit;
     private final ObjectProvider<JavaMailSender> mailSenders;
     private final String frontendUrl;
-    private final String fromAddress;\n    private final String smtpHost;\n    private final PasswordEncoder passwordEncoder;
+    private final String fromAddress;
+    private final String smtpHost;
+    private final PasswordEncoder passwordEncoder;
     private final SecureRandom random = new SecureRandom();
 
     public PasswordResetService(UserRepository users, PasswordResetTokenRepository tokens,
             LoginSessionRepository sessions, AuditLogRepository audit,
             ObjectProvider<JavaMailSender> mailSenders,
             @Value("${app.frontend-url}") String frontendUrl,
-            @Value("${SMTP_FROM:no-reply@barangayconnect.local}") String fromAddress,\n            @Value("${SMTP_HOST:}") String smtpHost, PasswordEncoder passwordEncoder) {
+            @Value("${SMTP_FROM:no-reply@barangayconnect.local}") String fromAddress,
+            @Value("${SMTP_HOST:}") String smtpHost, PasswordEncoder passwordEncoder) {
         this.users = users;
         this.tokens = tokens;
         this.sessions = sessions;
         this.audit = audit;
         this.mailSenders = mailSenders;
         this.frontendUrl = frontendUrl;
-        this.fromAddress = fromAddress;\n        this.smtpHost = smtpHost;\n        this.passwordEncoder = passwordEncoder;
+        this.fromAddress = fromAddress;
+        this.smtpHost = smtpHost;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
     public void requestReset(String email, HttpServletRequest request) {
-        String normalized = email.trim().toLowerCase(Locale.ROOT);
-        UserAccount user = users.findByEmailIgnoreCase(normalized).orElse(null);
-        if (user == null) return;
-
         JavaMailSender sender = mailSenders.getIfAvailable();
-        if (sender == null) {
+        if (smtpHost.isBlank() || sender == null) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
                     "Password recovery email is not configured. Contact the system administrator.");
         }
 
-        String normalized = email.trim().toLowerCase(Locale.ROOT);\n        UserAccount user = users.findByEmailIgnoreCase(normalized).orElse(null);\n        if (user == null) return;\n\n        byte[] bytes = new byte[32];
+        String normalized = email.trim().toLowerCase(Locale.ROOT);
+        UserAccount user = users.findByEmailIgnoreCase(normalized).orElse(null);
+        if (user == null) return;
+
+        byte[] bytes = new byte[32];
         random.nextBytes(bytes);
         String rawToken = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
         String tokenHash = hash(rawToken);
@@ -100,14 +104,12 @@ public class PasswordResetService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "The reset link is invalid, expired, or already used."));
         if (reset.getExpiresAt().isBefore(Instant.now())) {
-            reset.markUsed();
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "The reset link has expired. Request a new password reset email.");
         }
 
         UserAccount user = reset.getUser();
-        user.setPasswordHash(new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder(12)
-                .encode(newPassword));
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
         reset.markUsed();
         sessions.revokeAllForUser(user.getId());
         audit.save(new AuditLog(user.getId(), user.getEmail(), "PASSWORD_RESET_COMPLETED",
