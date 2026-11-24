@@ -100,10 +100,10 @@ public class PasswordResetService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password confirmation does not match.");
         }
 
-        PasswordResetToken reset = tokens.findByTokenHashAndUsedAtIsNull(hash(rawToken))
+        PasswordResetToken reset = tokens.findUnusedTokenForUpdate(hash(rawToken))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "The reset link is invalid, expired, or already used."));
-        if (reset.getExpiresAt().isBefore(Instant.now())) {
+        if (!reset.getExpiresAt().isAfter(Instant.now())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "The reset link has expired. Request a new password reset email.");
         }
