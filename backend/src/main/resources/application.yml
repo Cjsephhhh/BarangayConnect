@@ -33,3 +33,16 @@ app:
 logging:
   level:
     org.springframework.security: INFO
+  frontend-url: ${FRONTEND_URL:http://localhost:5173}
+spring:
+  mail:
+    host: ${SMTP_HOST:}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
