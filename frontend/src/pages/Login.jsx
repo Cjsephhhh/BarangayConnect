@@ -2,4 +2,104 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowRight, ShieldCheck, Users, Landmark } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-export default function Login(){const [identifier,setIdentifier]=useState('');const [password,setPassword]=useState('');const [error,setError]=useState('');const [busy,setBusy]=useState(false);const {login}=useAuth();const nav=useNavigate();async function submit(e){e.preventDefault();setError('');setBusy(true);try{await login(identifier,password);nav('/dashboard')}catch(err){setError(err.message)}finally{setBusy(false)}}return <main className="auth-layout"><section className="brand-panel"><div className="brand-lockup"><div className="brand-mark"><Landmark size={25}/></div><span>Barangay<span className="brand-light">Connect</span></span></div><div className="brand-copy"><p className="eyebrow">COMMUNITY • SERVICE • TRUST</p><h1>Stronger communities start with <em>better connections.</em></h1><p>A guided, transparent way to manage barangay concerns and community dispute resolution.</p><div className="brand-points"><div><ShieldCheck/><span>Secure and private access</span></div><div><Users/><span>One platform for your barangay</span></div></div></div><div className="brand-foot">A digital service for better community support.</div></section><section className="auth-panel"><div className="auth-card"><div className="mobile-brand">Barangay<span>Connect</span></div><p className="eyebrow green">WELCOME BACK</p><h2>Sign in to your account</h2><p className="muted">Enter your registered email or mobile number.</p><form onSubmit={submit} className="form-stack"><label>Email or mobile number<input autoComplete="username" value={identifier} onChange={e=>setIdentifier(e.target.value)} placeholder="you@example.com or 09XXXXXXXXX" required/></label><label>Password<input type="password" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Enter your password" required/></label>{error&&<div className="alert">{error}</div>}<button className="primary-btn" disabled={busy}>{busy?'Signing in…':'Sign in'} <ArrowRight size={17}/></button></form><p className="form-foot">New to BarangayConnect? <Link to="/register">Create a resident account</Link></p><div className="privacy-note"><ShieldCheck size={16}/> Your account and case information are protected.</div></div></section></main>}
+export default function Login() {
+  const [identifier, setIdentifier] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [busy, setBusy] = useState(false)
+  const { login } = useAuth()
+  const nav = useNavigate()
+  async function submit(e) {
+    e.preventDefault()
+    setError('')
+    setBusy(true)
+    try {
+      await login(identifier, password)
+      nav('/dashboard')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+  return (
+    <main className="auth-layout">
+      <section className="brand-panel">
+        <div className="brand-lockup">
+          <div className="brand-mark">
+            <Landmark size={25} />
+          </div>
+          <span>
+            Barangay<span className="brand-light">Connect</span>
+          </span>
+        </div>
+        <div className="brand-copy">
+          <p className="eyebrow">COMMUNITY • SERVICE • TRUST</p>
+          <h1>
+            Stronger communities start with <em>better connections.</em>
+          </h1>
+          <p>
+            A guided, transparent way to manage barangay concerns and community dispute resolution.
+          </p>
+          <div className="brand-points">
+            <div>
+              <ShieldCheck />
+              <span>Secure and private access</span>
+            </div>
+            <div>
+              <Users />
+              <span>One platform for your barangay</span>
+            </div>
+          </div>
+        </div>
+        <div className="brand-foot">A digital service for better community support.</div>
+      </section>
+      <section className="auth-panel">
+        <div className="auth-card">
+          <div className="mobile-brand">
+            Barangay<span>Connect</span>
+          </div>
+          <p className="eyebrow green">WELCOME BACK</p>
+          <h2>Sign in to your account</h2>
+          <p className="muted">Enter your registered email or mobile number.</p>
+          <form onSubmit={submit} className="form-stack">
+            <label>
+              Email or mobile number
+              <input
+                autoComplete="username"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                placeholder="you@example.com or 09XXXXXXXXX"
+                required
+              />
+            </label>
+            <label>
+              Password
+              <input
+                type="password"
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                required
+              />
+            </label>
+            <div className="forgot-link">
+              <Link to="/forgot-password">Forgot password?</Link>
+            </div>
+            {error && <div className="alert">{error}</div>}
+            <button className="primary-btn" disabled={busy}>
+              {busy ? 'Signing in…' : 'Sign in'} <ArrowRight size={17} />
+            </button>
+          </form>
+          <p className="form-foot">
+            New to BarangayConnect? <Link to="/register">Create a resident account</Link>
+          </p>
+          <div className="privacy-note">
+            <ShieldCheck size={16} /> Your account and case information are protected.
+          </div>
+        </div>
+      </section>
+    </main>
+  )
+}
